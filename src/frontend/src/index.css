@@ -1,0 +1,69 @@
+/* ============================================================
+   SignalScope — Global Styles
+   Clean, responsive, hackathon-demo friendly.
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg:           #0f0f1a;
+  --color-surface:      #1a1a2e;
+  --color-surface-2:    #22223b;
+  --color-border:       #2e2e4d;
+  --color-primary:      #4f8ef7;
+  --color-primary-dark: #2563eb;
+  --color-success:      #22c55e;
+  --color-warning:      #f59e0b;
+  --color-error:        #ef4444;
+  --color-text:         #e2e8f0;
+  --color-text-muted:   #94a3b8;
+  --color-text-faint:   #475569;
+
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+body {
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}

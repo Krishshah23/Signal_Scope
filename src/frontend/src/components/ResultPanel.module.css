@@ -1,0 +1,150 @@
+.panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+}
+
+/* Error state */
+.errorBadge {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.errorTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-error);
+  margin-bottom: 0.5rem;
+}
+
+.errorMessage {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+/* Development / not-implemented state */
+.devBadge {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.devTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-warning);
+  margin-bottom: 0.5rem;
+}
+
+.devMessage {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  max-width: 520px;
+}
+
+.devFile {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.devNote {
+  display: inline-block;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* Real result state */
+.resultTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.verdict {
+  display: inline-block;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--radius-md);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.verdictAI {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.verdictReal {
+  background-color: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Confidence */
+.confidenceRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.confidenceLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.confidenceValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.confidenceBar {
+  grid-column: 1 / -1;
+  height: 8px;
+  background-color: var(--color-surface-2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.confidenceFill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* Disclaimer */
+.disclaimer {
+  font-size: 0.8rem;
+  color: var(--color-text-faint);
+  margin-top: 0.5rem;
+}
+
+/* Heatmap */
+.heatmapSection {
+  margin-top: 1.25rem;
+}
+
+.heatmapTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.heatmap {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}

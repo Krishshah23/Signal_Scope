@@ -1,0 +1,126 @@
+# ==============================================================
+# SignalScope — .gitignore
+# ==============================================================
+
+# --------------------------------------------------------------
+# Python
+# --------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env.bak
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.coveragerc
+
+# mypy / type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyright/
+
+# --------------------------------------------------------------
+# Environment / secrets — NEVER COMMIT THESE
+# --------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials.json
+
+# --------------------------------------------------------------
+# Model weights and large binary files
+# --------------------------------------------------------------
+model/weights/*.h5
+model/weights/*.keras
+model/weights/*.pb
+model/weights/saved_model/
+model/weights/*.ckpt*
+model/weights/*.index
+model/weights/*.data-*
+*.weights.h5
+
+# --------------------------------------------------------------
+# Datasets — do not commit large data files
+# --------------------------------------------------------------
+data/
+datasets/
+*.csv
+*.parquet
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+
+# Exception: small test fixtures can be committed if needed
+# !src/backend/tests/fixtures/*.jpg
+
+# --------------------------------------------------------------
+# Frontend
+# --------------------------------------------------------------
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/.env
+src/frontend/.env.local
+src/frontend/.env.*.local
+
+# Vite
+src/frontend/.vite/
+
+# --------------------------------------------------------------
+# OS / editor
+# --------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --------------------------------------------------------------
+# Logs and temporary files
+# --------------------------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# --------------------------------------------------------------
+# Jupyter (in case notebooks are used for experiments)
+# --------------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb
+
+# --------------------------------------------------------------
+# Report outputs (generated files, not source)
+# --------------------------------------------------------------
+report/figures/
+report/*.pdf
+report/*.docx
