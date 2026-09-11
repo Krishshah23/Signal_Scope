@@ -128,3 +128,10 @@ report/*.docx
 # CIFAKE dataset
 train/
 test/
+
+# Virtual environment (Session 2 — Python 3.12 venv for TF)
+.venv/
+
+# Training artifacts (large binaries — not committed)
+model/weights/signalscope_baseline.keras
+model/weights/training_history.json
