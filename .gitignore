@@ -124,3 +124,7 @@ temp/
 report/figures/
 report/*.pdf
 report/*.docx
+
+# CIFAKE dataset
+train/
+test/
