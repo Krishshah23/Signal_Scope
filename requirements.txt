@@ -23,8 +23,10 @@ pytest==8.2.2
 pytest-flask==1.3.0
 
 # --------------------------------------------------------------
-# Future: ML inference (added in model training milestone)
+# ML — model training and inference (Session 2)
+# Requires Python 3.12 (TF 2.18 not yet available for Python 3.14)
+# Install in the project venv: .venv/Scripts/python -m pip install -r requirements.txt
 # --------------------------------------------------------------
-# tensorflow==2.17.0
-# Pillow==10.4.0
-# numpy==1.26.4
+tensorflow==2.18.0
+Pillow==10.4.0
+numpy==1.26.4
