@@ -58,7 +58,7 @@ class Config:
     # Model (populated in a future session once weights are trained)
     # -----------------------------------------------------------------
     MODEL_WEIGHTS_PATH: str = os.environ.get(
-        "MODEL_WEIGHTS_PATH", "model/weights/signalscope.h5"
+        "MODEL_WEIGHTS_PATH", "model/weights/signalscope_baseline.keras"
     )
 
 

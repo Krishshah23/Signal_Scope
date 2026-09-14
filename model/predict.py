@@ -281,6 +281,6 @@ def _build_result(raw_prob: float) -> dict:
         "verdict": verdict,
         "confidence": round(float(confidence), 4),
         "raw_prob": round(float(raw_prob), 4),
-        "heatmap": None,       # Grad-CAM milestone (Session 4)
-        "explanation": None,   # Grad-CAM milestone (Session 4)
+        "heatmap": None,       # base64 PNG — Grad-CAM milestone (future session)
+        "explanation": None,   # text description — Grad-CAM milestone (future session)
     }

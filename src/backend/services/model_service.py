@@ -1,54 +1,92 @@
 """
 Model Service
 --------------
-This service layer sits between the Flask routes and the raw model/predict.py
-interface. Its job is to:
+Service layer between Flask routes and model/predict.py.
 
-  1. Load the trained model (once weights exist).
-  2. Preprocess an uploaded image into the correct tensor format.
-  3. Call model.predict.predict(image_path).
-  4. Format the raw model output into an API-friendly dict.
-  5. Optionally attach a Grad-CAM heatmap (future milestone).
+Responsibilities:
+  1. Resolve the model weights path from Flask app config.
+  2. Call model.predict.predict(image_path) — the single public inference contract.
+  3. Return the prediction dict to the route handler.
+  4. Translate model-layer exceptions into service-layer exceptions the route
+     can map to appropriate HTTP responses.
 
-CURRENT STATUS (Session 1 — Foundation):
-  The model has not been trained.
-  This service raises NotImplementedError on any inference call.
-  Import is safe; the error only surfaces when run() is called.
+This layer never imports TensorFlow directly.
+All ML work is encapsulated in model/predict.py.
+
+WORDING RULE:
+  Predictions are probabilistic estimates, never certainties.
+  Results are described as "likely AI-generated" or "likely real".
 """
 
 from __future__ import annotations
 
 import logging
+import sys
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Ensure model/ is importable from the Flask runtime.
+# When Flask runs from src/backend/, model/ is two levels up.
+# ---------------------------------------------------------------------------
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent  # Signal_scope/
+_MODEL_DIR = _PROJECT_ROOT / "model"
+if str(_MODEL_DIR) not in sys.path:
+    sys.path.insert(0, str(_MODEL_DIR))
+
+
+# ---------------------------------------------------------------------------
+# Exceptions
+# ---------------------------------------------------------------------------
 
 
 class ModelNotReadyError(Exception):
     """
-    Raised when inference is requested but the model has not been
-    loaded or trained yet.
+    Raised when inference is requested but the model weights are missing
+    or cannot be loaded.
     """
+
+
+class InferenceError(Exception):
+    """
+    Raised when inference fails for an unexpected reason (corrupt image,
+    runtime error, etc.).
+    """
+
+
+# ---------------------------------------------------------------------------
+# Service
+# ---------------------------------------------------------------------------
 
 
 class ModelService:
     """
     Wraps the ML prediction pipeline for use by Flask route handlers.
 
-    Future usage (once model weights exist):
-    ----------------------------------------
-    service = ModelService(weights_path="model/weights/signalscope.h5")
-    result  = service.run(image_path="/tmp/uploaded.jpg")
+    Usage
+    -----
+    service = ModelService(weights_path="model/weights/signalscope_baseline.keras")
+    result  = service.run(image_path="/tmp/uploaded_image.jpg")
     # result → {
-    #     "verdict":     "likely AI-generated",
-    #     "confidence":  0.87,
-    #     "heatmap":     None,   # base64 PNG in future milestone
-    #     "explanation": None,   # text template in future milestone
+    #     "verdict":      "likely AI-generated" | "likely real",
+    #     "confidence":   0.0 – 1.0,
+    #     "raw_prob":     0.0 – 1.0,
+    #     "heatmap":      None,
+    #     "explanation":  None,
     # }
     """
 
     def __init__(self, weights_path: str | None = None) -> None:
+        """
+        Parameters
+        ----------
+        weights_path : str, optional
+            Path to the trained .keras model file.
+            If None, model/predict.py uses its own default
+            (model/weights/signalscope_baseline.keras relative to project root).
+        """
         self.weights_path = weights_path
-        self._model = None  # populated in a future session
 
     # ------------------------------------------------------------------
     # Public interface
@@ -56,68 +94,60 @@ class ModelService:
 
     def run(self, image_path: str) -> dict:
         """
-        Run inference on a single image.
+        Run inference on a single image file.
 
         Parameters
         ----------
         image_path : str
-            Absolute path to a saved image file.
-
-        Returns
-        -------
-        dict
-            Prediction result (see class docstring for schema).
-
-        Raises
-        ------
-        ModelNotReadyError
-            Always raised during Session 1 — model not yet trained.
-        """
-        logger.warning(
-            "ModelService.run() called but model is not yet trained. "
-            "This will be implemented in a future session."
-        )
-        raise ModelNotReadyError(
-            "The SignalScope model has not been trained yet. "
-            "Inference will be available after the model training milestone."
-        )
-
-    # ------------------------------------------------------------------
-    # Private helpers (stubs for future implementation)
-    # ------------------------------------------------------------------
-
-    def _load_model(self) -> None:
-        """Load the TensorFlow/Keras model from weights_path. (Future milestone.)"""
-        raise NotImplementedError("Model loading not yet implemented.")
-
-    def _preprocess(self, image_path: str):
-        """
-        Load and preprocess an image to a (1, 128, 128, 3) float32 tensor.
-        (Future milestone — will use tf.keras.preprocessing or PIL.)
-        """
-        raise NotImplementedError("Image preprocessing not yet implemented.")
-
-    def _build_response(self, raw_probability: float) -> dict:
-        """
-        Convert a raw sigmoid output probability to the API response dict.
-
-        Parameters
-        ----------
-        raw_probability : float
-            Output of Dense(1, sigmoid) — value in [0, 1].
-            Convention: values closer to 1 → AI-generated,
-                        values closer to 0 → real.
+            Absolute path to a saved image file on disk.
+            The file must exist and be a readable image (JPEG/PNG/WebP/BMP).
 
         Returns
         -------
         dict
             {
-                "verdict":     "likely AI-generated" | "likely real",
-                "confidence":  float (0.0 – 1.0),
-                "heatmap":     None,
-                "explanation": None,
+                "verdict":      "likely AI-generated" | "likely real",
+                "confidence":   float (0.0 – 1.0),
+                "raw_prob":     float (0.0 – 1.0),
+                "heatmap":      None,
+                "explanation":  None,
             }
 
-        NOTE: Predictions are probabilistic, never certain.
+        Raises
+        ------
+        ModelNotReadyError
+            If the model weights file cannot be found or loaded.
+        InferenceError
+            If inference fails for any other reason (corrupt image, runtime error).
         """
-        raise NotImplementedError("Response builder not yet implemented.")
+        try:
+            from predict import predict, ModelNotTrainedError, InvalidImageError
+        except ImportError as exc:
+            raise InferenceError(
+                f"Could not import model/predict.py. "
+                f"Ensure the project root is on sys.path. Details: {exc}"
+            ) from exc
+
+        logger.info("ModelService.run() called for image: %s", image_path)
+
+        try:
+            result = predict(image_path, weights_path=self.weights_path)
+            logger.info(
+                "Inference complete — verdict: %s  confidence: %.4f",
+                result["verdict"],
+                result["confidence"],
+            )
+            return result
+
+        except ModelNotTrainedError as exc:
+            raise ModelNotReadyError(str(exc)) from exc
+
+        except (FileNotFoundError, InvalidImageError) as exc:
+            # Re-raise as InferenceError so routes only need to catch one type
+            raise InferenceError(str(exc)) from exc
+
+        except Exception as exc:
+            logger.exception("Unexpected inference error for %s", image_path)
+            raise InferenceError(
+                f"Inference failed unexpectedly: {exc}"
+            ) from exc
