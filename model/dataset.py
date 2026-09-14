@@ -208,9 +208,15 @@ def build_train_val_datasets(
         .prefetch(AUTOTUNE)
     )
 
-    # Count samples
-    train_samples = sum(1 for _ in raw_train_ds.unbatch())
-    val_samples = sum(1 for _ in raw_val_ds.unbatch())
+    # Derive sample counts from the known total and split ratio
+    # (avoids an expensive full dataset iteration just for counting)
+    total_files = sum(
+        len(list((Path(train_dir) / cls).iterdir()))
+        for cls in ["FAKE", "REAL"]
+        if (Path(train_dir) / cls).is_dir()
+    )
+    train_samples = int(total_files * (1.0 - validation_split))
+    val_samples = total_files - train_samples
 
     info = {
         "train_samples": train_samples,

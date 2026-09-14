@@ -135,3 +135,8 @@ test/
 # Training artifacts (large binaries — not committed)
 model/weights/signalscope_baseline.keras
 model/weights/training_history.json
+
+# Temporary training scripts and logs (Session 2)
+run_training.py
+training_log.txt
+training_output.txt
