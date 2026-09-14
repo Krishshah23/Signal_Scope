@@ -1,0 +1,71 @@
+{
+  "status": "completed",
+  "evaluation_time_seconds": 645.6,
+  "model": {
+    "name": "SignalScope MobileNetV2 baseline",
+    "path": "C:\\Users\\Admin\\Signal_scope\\model\\weights\\signalscope_baseline.keras",
+    "input_shape": [
+      128,
+      128,
+      3
+    ],
+    "backbone": "MobileNetV2 (frozen, ImageNet pretrained)",
+    "head": "GlobalAveragePooling2D \u2192 Dense(1, sigmoid)",
+    "threshold": 0.5
+  },
+  "dataset": {
+    "name": "CIFAKE",
+    "split": "held-out test",
+    "path": "C:\\Users\\Admin\\Signal_scope\\test",
+    "total_samples": 20000,
+    "real_samples": 10000,
+    "fake_samples": 10000,
+    "class_mapping": {
+      "REAL": 0,
+      "FAKE": 1
+    }
+  },
+  "metrics": {
+    "accuracy": 0.664,
+    "roc_auc": 0.76015,
+    "macro_f1": 0.648545,
+    "precision": 0.699004,
+    "recall": 0.664
+  },
+  "confusion_matrix": {
+    "matrix": [
+      [
+        8737,
+        1263
+      ],
+      [
+        5457,
+        4543
+      ]
+    ],
+    "row_labels": [
+      "REAL",
+      "FAKE"
+    ],
+    "col_labels": [
+      "REAL",
+      "FAKE"
+    ],
+    "interpretation": "rows=actual class, cols=predicted class. cm[0][0]=REAL\u2192REAL (TN=8737), cm[0][1]=REAL\u2192FAKE (FP=1263), cm[1][0]=FAKE\u2192REAL (FN=5457), cm[1][1]=FAKE\u2192FAKE (TP=4543)"
+  },
+  "prediction_counts": {
+    "total": 20000,
+    "correct": 13280,
+    "incorrect": 6720,
+    "tn": 8737,
+    "fp": 1263,
+    "fn": 5457,
+    "tp": 4543
+  },
+  "notes": [
+    "These are final HELD-OUT TEST metrics. The test set was never used for training, validation, hyperparameter tuning, or model selection.",
+    "model.fit() was NOT called during evaluation.",
+    "Model weights were NOT modified.",
+    "Session 2 validation metrics are separate and are NOT reported here."
+  ]
+}
