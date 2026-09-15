@@ -1,11 +1,17 @@
 [project]
 name = "signal-scope"
 version = "0.1.0"
-description = "Signal Scope"
-requires-python = ">=3.12,<3.14"
+description = "SignalScope backend API"
+requires-python = ">=3.12,<3.13"
+
 dependencies = [
-    "flask==3.0.3",
-    "flask-cors",
+    "Flask==3.0.3",
+    "flask-cors==4.0.1",
+    "tensorflow==2.18.0",
+    "Pillow==10.4.0",
+    "numpy==1.26.4",
+    "scikit-learn==1.5.2",
+    "matplotlib==3.9.2",
 ]
 
 [tool.vercel]
