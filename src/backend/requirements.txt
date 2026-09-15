@@ -8,6 +8,7 @@
 # Core framework
 Flask==3.0.3
 flask-cors==4.0.1
+gunicorn==23.0.0
 
 # Testing
 pytest==8.2.2
