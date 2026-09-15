@@ -1,2 +1,9 @@
+[project]
+name = "signal-scope"
+version = "0.1.0"
+description = "Signal Scope"
+requires-python = ">=3.12,<3.14"
+dependencies = []
+
 [tool.vercel]
 entrypoint = "src.backend.app:app"
