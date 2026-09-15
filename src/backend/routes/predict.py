@@ -134,7 +134,7 @@ def _get_model_service():
     The weights_path is passed explicitly so tests can override it via
     app.config["MODEL_WEIGHTS_PATH"] without patching module globals.
     """
-    from services.model_service import ModelService
+    from ..services.model_service import ModelService
 
     weights_path = current_app.config.get("MODEL_WEIGHTS_PATH")
     return ModelService(weights_path=weights_path)
@@ -200,7 +200,7 @@ def predict():
 
     except Exception as exc:
         # Import here to avoid circular-import issues at module level
-        from services.model_service import ModelNotReadyError, InferenceError
+        from ..services.model_service import ModelNotReadyError, InferenceError
 
         if isinstance(exc, ModelNotReadyError):
             current_app.logger.error("Model not available: %s", exc)
