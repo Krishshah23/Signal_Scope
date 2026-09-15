@@ -1,0 +1,394 @@
+{
+  "status": "completed",
+  "note": "Lightweight robustness check on a small sample. This is NOT the official held-out evaluation (accuracy=0.664, ROC-AUC=0.760 on 20,000 images \u2014 see report/evaluation_results.json).",
+  "configuration": {
+    "sample_size_per_class": 5,
+    "total_images": 10,
+    "stability_threshold": 0.1,
+    "transformations": [
+      "original",
+      "jpeg_q50",
+      "resize_64",
+      "brightness_plus",
+      "brightness_minus"
+    ]
+  },
+  "stability_summary": {
+    "jpeg_q50": {
+      "stable": 10,
+      "unstable": 0,
+      "total": 10,
+      "stability_rate_pct": 100.0
+    },
+    "resize_64": {
+      "stable": 10,
+      "unstable": 0,
+      "total": 10,
+      "stability_rate_pct": 100.0
+    },
+    "brightness_plus": {
+      "stable": 10,
+      "unstable": 0,
+      "total": 10,
+      "stability_rate_pct": 100.0
+    },
+    "brightness_minus": {
+      "stable": 10,
+      "unstable": 0,
+      "total": 10,
+      "stability_rate_pct": 100.0
+    }
+  },
+  "per_image_results": [
+    {
+      "file": "0 (10).jpg",
+      "class": "FAKE",
+      "true_label": 1,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.6912,
+          "verdict": "likely AI-generated"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.7283,
+          "delta_vs_original": 0.0371,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "resize_64": {
+          "raw_prob": 0.6327,
+          "delta_vs_original": 0.0585,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.6194,
+          "delta_vs_original": 0.0718,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.6863,
+          "delta_vs_original": 0.0049,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        }
+      }
+    },
+    {
+      "file": "0 (2).jpg",
+      "class": "FAKE",
+      "true_label": 1,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.5209,
+          "verdict": "likely AI-generated"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.5521,
+          "delta_vs_original": 0.0312,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "resize_64": {
+          "raw_prob": 0.4928,
+          "delta_vs_original": 0.0281,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.4819,
+          "delta_vs_original": 0.039,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.5212,
+          "delta_vs_original": 0.0003,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        }
+      }
+    },
+    {
+      "file": "0 (3).jpg",
+      "class": "FAKE",
+      "true_label": 1,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.5435,
+          "verdict": "likely AI-generated"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.5763,
+          "delta_vs_original": 0.0328,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "resize_64": {
+          "raw_prob": 0.5204,
+          "delta_vs_original": 0.0231,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.5127,
+          "delta_vs_original": 0.0308,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.5484,
+          "delta_vs_original": 0.0049,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        }
+      }
+    },
+    {
+      "file": "0 (4).jpg",
+      "class": "FAKE",
+      "true_label": 1,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.539,
+          "verdict": "likely AI-generated"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.6091,
+          "delta_vs_original": 0.0701,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "resize_64": {
+          "raw_prob": 0.4953,
+          "delta_vs_original": 0.0437,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.4765,
+          "delta_vs_original": 0.0625,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.5638,
+          "delta_vs_original": 0.0248,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        }
+      }
+    },
+    {
+      "file": "0 (5).jpg",
+      "class": "FAKE",
+      "true_label": 1,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.3893,
+          "verdict": "likely real"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.4058,
+          "delta_vs_original": 0.0165,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "resize_64": {
+          "raw_prob": 0.3585,
+          "delta_vs_original": 0.0308,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.3265,
+          "delta_vs_original": 0.0628,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.4163,
+          "delta_vs_original": 0.027,
+          "stable": true,
+          "verdict": "likely real"
+        }
+      }
+    },
+    {
+      "file": "0000 (10).jpg",
+      "class": "REAL",
+      "true_label": 0,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.2831,
+          "verdict": "likely real"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.3238,
+          "delta_vs_original": 0.0407,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "resize_64": {
+          "raw_prob": 0.2564,
+          "delta_vs_original": 0.0267,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.2569,
+          "delta_vs_original": 0.0262,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.3126,
+          "delta_vs_original": 0.0295,
+          "stable": true,
+          "verdict": "likely real"
+        }
+      }
+    },
+    {
+      "file": "0000 (2).jpg",
+      "class": "REAL",
+      "true_label": 0,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.7482,
+          "verdict": "likely AI-generated"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.7866,
+          "delta_vs_original": 0.0384,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "resize_64": {
+          "raw_prob": 0.7111,
+          "delta_vs_original": 0.0371,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.6918,
+          "delta_vs_original": 0.0564,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.7354,
+          "delta_vs_original": 0.0128,
+          "stable": true,
+          "verdict": "likely AI-generated"
+        }
+      }
+    },
+    {
+      "file": "0000 (3).jpg",
+      "class": "REAL",
+      "true_label": 0,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.2549,
+          "verdict": "likely real"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.2723,
+          "delta_vs_original": 0.0174,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "resize_64": {
+          "raw_prob": 0.247,
+          "delta_vs_original": 0.0079,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.225,
+          "delta_vs_original": 0.0299,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.2808,
+          "delta_vs_original": 0.0259,
+          "stable": true,
+          "verdict": "likely real"
+        }
+      }
+    },
+    {
+      "file": "0000 (4).jpg",
+      "class": "REAL",
+      "true_label": 0,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.4058,
+          "verdict": "likely real"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.4312,
+          "delta_vs_original": 0.0254,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "resize_64": {
+          "raw_prob": 0.3718,
+          "delta_vs_original": 0.034,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.3472,
+          "delta_vs_original": 0.0586,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.4483,
+          "delta_vs_original": 0.0425,
+          "stable": true,
+          "verdict": "likely real"
+        }
+      }
+    },
+    {
+      "file": "0000 (5).jpg",
+      "class": "REAL",
+      "true_label": 0,
+      "transforms": {
+        "original": {
+          "raw_prob": 0.1769,
+          "verdict": "likely real"
+        },
+        "jpeg_q50": {
+          "raw_prob": 0.1857,
+          "delta_vs_original": 0.0088,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "resize_64": {
+          "raw_prob": 0.1755,
+          "delta_vs_original": 0.0014,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_plus": {
+          "raw_prob": 0.1546,
+          "delta_vs_original": 0.0223,
+          "stable": true,
+          "verdict": "likely real"
+        },
+        "brightness_minus": {
+          "raw_prob": 0.2043,
+          "delta_vs_original": 0.0274,
+          "stable": true,
+          "verdict": "likely real"
+        }
+      }
+    }
+  ]
+}

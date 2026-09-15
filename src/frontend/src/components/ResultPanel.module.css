@@ -148,3 +148,19 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
 }
+
+/* Raw probability */
+.rawProb {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* Grad-CAM explanation text */
+.explanation {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: 0.625rem;
+  font-style: italic;
+  max-width: 520px;
+}

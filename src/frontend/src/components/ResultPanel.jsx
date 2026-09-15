@@ -2,19 +2,23 @@ import React from "react";
 import styles from "./ResultPanel.module.css";
 
 /**
- * ResultPanel — displays the API response or an error message.
+ * ResultPanel — displays the real SignalScope prediction result or an error.
  *
- * During Session 1, the model is not trained so the API returns
- * HTTP 501. This component handles that truthfully, showing a
- * clear development-status message rather than fake predictions.
+ * The backend now returns a real MobileNetV2 + Grad-CAM prediction.
+ * All verdicts are probabilistic: "likely AI-generated" | "likely real".
+ * This component never claims certainty.
  *
  * Props
  * -----
  * appState    : "result" | "error"
- * result      : object | null   (parsed JSON from the API)
+ * result      : object | null
+ *   { verdict, confidence, raw_prob, heatmap, explanation }
  * errorMessage: string
  */
 function ResultPanel({ appState, result, errorMessage }) {
+  // ------------------------------------------------------------------
+  // Error state
+  // ------------------------------------------------------------------
   if (appState === "error") {
     return (
       <section className={styles.panel} aria-label="Error" role="alert">
@@ -25,52 +29,28 @@ function ResultPanel({ appState, result, errorMessage }) {
     );
   }
 
-  // API returned a response — check whether it is a real result or
-  // the expected development-phase 501 not-implemented response.
-  const isNotImplemented = result?.status === "not_implemented";
-
-  if (isNotImplemented) {
-    return (
-      <section
-        className={styles.panel}
-        aria-label="Analysis status"
-      >
-        <div className={styles.devBadge} aria-hidden="true">🔬</div>
-        <h2 className={styles.devTitle}>Model Not Yet Trained</h2>
-        <p className={styles.devMessage}>
-          Your image was received and validated successfully. The SignalScope
-          ML model has not been trained yet — real predictions will be
-          available after the model training milestone is complete.
-        </p>
-        {result?.filename && (
-          <p className={styles.devFile}>
-            File received: <strong>{result.filename}</strong>
-          </p>
-        )}
-        <div className={styles.devNote}>
-          <strong>Development status:</strong> Upload pipeline ✓ &nbsp;·&nbsp;
-          Model inference: pending
-        </div>
-      </section>
-    );
-  }
-
-  // Future: real result rendering (verdict + confidence + heatmap)
-  // This branch will be activated once the model is connected.
+  // ------------------------------------------------------------------
+  // Real result from the trained model
+  // ------------------------------------------------------------------
   if (result?.verdict) {
     const isAI = result.verdict === "likely AI-generated";
+
     return (
       <section className={styles.panel} aria-label="Analysis result">
         <h2 className={styles.resultTitle}>Analysis Result</h2>
 
+        {/* Verdict badge */}
         <div
-          className={`${styles.verdict} ${isAI ? styles.verdictAI : styles.verdictReal}`}
+          className={`${styles.verdict} ${
+            isAI ? styles.verdictAI : styles.verdictReal
+          }`}
           role="status"
           aria-live="polite"
         >
           {result.verdict}
         </div>
 
+        {/* Confidence bar */}
         {result.confidence != null && (
           <div className={styles.confidenceRow}>
             <span className={styles.confidenceLabel}>Confidence</span>
@@ -92,31 +72,45 @@ function ResultPanel({ appState, result, errorMessage }) {
           </div>
         )}
 
+        {/* Raw probability — useful for understanding the model score */}
+        {result.raw_prob != null && (
+          <p className={styles.rawProb}>
+            Model score (FAKE probability):{" "}
+            <strong>{(result.raw_prob * 100).toFixed(1)}%</strong>
+          </p>
+        )}
+
+        {/* Disclaimer */}
         <p className={styles.disclaimer}>
           This is a probabilistic estimate. SignalScope never claims certainty
           about whether an image is AI-generated or real.
         </p>
 
-        {/* Heatmap placeholder — populated in Grad-CAM milestone */}
+        {/* Grad-CAM heatmap overlay */}
         {result.heatmap && (
           <div className={styles.heatmapSection}>
-            <h3 className={styles.heatmapTitle}>Explanation Heatmap</h3>
+            <h3 className={styles.heatmapTitle}>Grad-CAM Explanation</h3>
             <img
               src={`data:image/png;base64,${result.heatmap}`}
-              alt="Grad-CAM explanation heatmap"
+              alt="Grad-CAM heatmap overlay — highlighted regions influenced the model prediction"
               className={styles.heatmap}
             />
+            {result.explanation && (
+              <p className={styles.explanation}>{result.explanation}</p>
+            )}
           </div>
         )}
       </section>
     );
   }
 
-  // Unexpected API response shape
+  // ------------------------------------------------------------------
+  // Unexpected / empty response
+  // ------------------------------------------------------------------
   return (
     <section className={styles.panel} aria-label="Unexpected response">
       <p className={styles.errorMessage}>
-        Received an unexpected response from the server.
+        Received an unexpected response from the server. Please try again.
       </p>
     </section>
   );

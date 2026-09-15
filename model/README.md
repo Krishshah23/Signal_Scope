@@ -1,136 +1,146 @@
 # SignalScope — Model
 
-This directory contains the machine learning model code for SignalScope.
+This directory contains the machine learning pipeline for SignalScope.
 
 ---
 
-## Current Status
+## Status
 
-**Session 1 — Foundation only.**
+All milestones complete:
 
-The prediction interface has been established. No model has been trained yet.
-No weights exist. No inference is performed.
-
----
-
-## Implemented
-
-| Item | Status |
+| Component | Status |
 |---|---|
-| `predict.py` — public `predict(image_path)` interface | ✅ Done |
-| `ModelNotTrainedError` exception | ✅ Done |
-| `InvalidImageError` exception | ✅ Done |
-| Constants: `IMAGE_SIZE`, `VERDICT_AI`, `VERDICT_REAL`, `CLASSIFICATION_THRESHOLD` | ✅ Done |
-| Architecture documentation in docstrings | ✅ Done |
-| Private helper stubs for future implementation | ✅ Done |
-
----
-
-## Planned (Future Milestones)
-
-| Item | Milestone |
-|---|---|
-| Download and prepare CIFAKE dataset | Model Training |
-| Collect disclosed-generator samples | Model Training |
-| Implement `_preprocess_image()` — resize to 128×128, normalise | Model Training |
-| Implement `_load_model()` — load `.h5` weights | Model Training |
-| Train MobileNetV2 or EfficientNetB0 with frozen base | Model Training |
-| Head: `GlobalAveragePooling2D → Dense(1, sigmoid)` | Model Training |
-| Data augmentation (flip, rotation, brightness) | Model Training |
-| Implement `_build_result()` — verdict + confidence | Model Training |
-| Connect `predict()` to real inference | Model Training |
-| Evaluate ROC-AUC, Macro-F1, confusion matrix | Metrics |
-| Grad-CAM heatmap generation (last conv layer) | Grad-CAM |
-| Robustness testing (JPEG recompression, resizing) | Robustness |
-| Generalization testing on unseen generators | Robustness |
+| Training pipeline (`train.py`) | ✅ Done |
+| Prediction interface (`predict.py`) | ✅ Done |
+| Grad-CAM explainability (`gradcam.py`) | ✅ Done |
+| Held-out evaluation (`evaluate.py`) | ✅ Done |
+| Robustness check (`evaluate_robustness.py`) | ✅ Done |
 
 ---
 
 ## Architecture
 
 ```
-Input image (any size, JPEG/PNG/WebP/BMP)
-        |
-        v
-_preprocess_image()
-  - Resize to 128 × 128
-  - Convert to float32
-  - Normalise to [0, 1]
-  - Add batch dimension → shape (1, 128, 128, 3)
-        |
-        v
-Pretrained base (MobileNetV2 or EfficientNetB0)
-  - Weights: ImageNet pretrained
-  - Base layers: frozen initially
-        |
-        v
+Input (128×128×3 RGB, normalised to [0,1])
+        ↓
+[Internal] mobilenet_v2.preprocess_input (→ [-1,1])
+        ↓
+MobileNetV2 (ImageNet weights, base FROZEN)
+  Trainable params: 1,281
+  Non-trainable params: 2,257,984
+        ↓
 GlobalAveragePooling2D
-        |
-        v
+        ↓
 Dense(1, activation='sigmoid')
-  - Output: single probability in [0, 1]
-  - ≥ 0.5 → "likely AI-generated"
-  - <  0.5 → "likely real"
-        |
-        v
-_build_result()
-  - verdict: "likely AI-generated" | "likely real"
-  - confidence: probability of the stated verdict
-        |
-        v
-predict() return dict
+        ↓
+Sigmoid probability [0,1]
 ```
 
-**Important:** Predictions are probabilistic estimates, not certainties.
-Results are always described as **"likely AI-generated"** or **"likely real"**.
-The system never claims 100% certainty.
+**Class convention:** `REAL = 0`, `FAKE = 1`
+
+**Threshold:** `raw_prob >= 0.5` → `"likely AI-generated"`
 
 ---
 
-## Public Interface
+## Prediction Interface
+
+The public contract is:
 
 ```python
 from model.predict import predict
 
-result = predict(image_path="/path/to/image.jpg")
+result = predict("/path/to/image.jpg")
+# or with explicit weights:
+result = predict("/path/to/image.jpg", weights_path="/path/to/signalscope_baseline.keras")
 
-# result = {
-#     "verdict":     "likely AI-generated",  # or "likely real"
-#     "confidence":  0.87,                   # 0.0 – 1.0
-#     "raw_prob":    0.87,                   # raw sigmoid output
-#     "heatmap":     None,                   # base64 PNG (future)
-#     "explanation": None,                   # text description (future)
+# result:
+# {
+#   "verdict":     "likely AI-generated" | "likely real",
+#   "confidence":  float,   # certainty of stated verdict (0-1)
+#   "raw_prob":    float,   # raw sigmoid output (0-1)
+#   "heatmap":     str | None,   # base64 PNG of Grad-CAM overlay
+#   "explanation": str | None    # human-readable explanation
 # }
 ```
 
+**Notes:**
+- Model is loaded lazily and cached on first call
+- Grad-CAM is generated automatically via logit-based gradients
+- If Grad-CAM fails, prediction still succeeds with `heatmap=None`
+
 ---
 
-## Weights Directory
+## Input Preprocessing
 
-`model/weights/` is reserved for trained model weights.
+Matches the training pipeline exactly:
 
-**Do not commit weights to Git.** Add weight files to `.gitignore`.
-Large model files should be shared via a separate mechanism
-(Google Drive, HuggingFace Hub, or equivalent).
+1. Load image with PIL, convert to RGB
+2. Resize to 128×128 using BILINEAR interpolation
+3. Normalise to [0, 1] by dividing by 255.0
+4. Shape: `(1, 128, 128, 3)` float32
+5. `mobilenet_v2.preprocess_input` is applied **inside the model graph**
+   — do NOT apply it externally
+
+---
+
+## Grad-CAM Details
+
+- **Target layer:** `out_relu` inside `mobilenetv2_1.00_128` (last spatial activation, 4×4×1280)
+- **Gradient target:** pre-sigmoid logit (avoids vanishing gradients from sigmoid saturation)
+- **Output:** base64-encoded RGB PNG overlay (heatmap blended onto resized input)
+- **Interpretation:** highlighted regions influenced the model's prediction; not proof of manipulation
+
+---
+
+## Training Configuration
+
+| Parameter | Value |
+|---|---|
+| Dataset | CIFAKE (100k train + 20k test) |
+| Image size | 128×128 RGB |
+| Batch size | 32 |
+| Max epochs | 10 |
+| Actual epochs | 6 (early stopping) |
+| Learning rate | 1e-3 |
+| Optimizer | Adam |
+| Loss | binary crossentropy |
+| Val split | 15% of train/ |
+| Random seed | 42 |
+
+---
+
+## Held-Out Evaluation Results
+
+Evaluated on all 20,000 images in `test/` — **not used for training or tuning**.
+
+| Metric | Value |
+|---|---|
+| Accuracy | 66.4% |
+| ROC-AUC | 0.760 |
+| Macro-F1 | 0.649 |
+| Precision (macro) | 0.699 |
+| Recall (macro) | 0.664 |
+
+Full results: `report/evaluation_results.json`
+
+---
+
+## Weights
+
+`model/weights/signalscope_baseline.keras` (~9.6 MB) — gitignored.
+
+To train from scratch:
+```bash
+.venv/Scripts/python model/train.py
+```
 
 ---
 
 ## Dataset
 
-The model will be trained on:
+- **CIFAKE** — Bird & Lotfi (2024), IEEE Access, CC BY 4.0
+- [Kaggle](https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images)
+- `train/FAKE/` and `train/REAL/` — 50,000 images each
+- `test/FAKE/` and `test/REAL/` — 10,000 images each
 
-- **CIFAKE** — a publicly available dataset of AI-generated and real images
-  ([CIFAKE on Kaggle](https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images))
-- **Disclosed-generator samples** — images from known AI generators
-
-Dataset files are **not committed to Git**. See the project README for setup instructions.
-
----
-
-## References
-
-- Krizhevsky, A. (2009). *Learning Multiple Layers of Features from Tiny Images.*
-- Howard, A. et al. (2017). *MobileNets: Efficient Convolutional Neural Networks.*
-- Tan, M. & Le, Q. V. (2019). *EfficientNet: Rethinking Model Scaling.*
-- Selvaraju, R. R. et al. (2017). *Grad-CAM: Visual Explanations from Deep Networks.*
-- CIFAKE dataset: [kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images](https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images)
+Datasets are gitignored and must be placed at project root before training.
