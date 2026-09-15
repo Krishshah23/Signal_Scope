@@ -21,9 +21,9 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-from config import get_config
-from routes.health import health_bp
-from routes.predict import predict_bp
+from .config import get_config
+from .routes.health import health_bp
+from .routes.predict import predict_bp
 
 
 def create_app(env: str | None = None) -> Flask:
