@@ -35,7 +35,7 @@
  * Verdicts are always "likely AI-generated" or "likely real".
  */
 
-const API_BASE = "/api/v1";
+const API_BASE = "https://api.signalscope.kreesh.me/api/v1";
 
 /**
  * Upload an image file and return SignalScope's prediction.
