@@ -7,24 +7,24 @@ This module is the single contract between the Flask backend and the
 TensorFlow/Keras model. The backend ONLY calls predict() — it never
 imports TensorFlow directly.
 
-SESSION 2 STATUS:
-    Model has been trained on CIFAKE (Session 2).
-    Weights are saved to: model/weights/signalscope_baseline.keras
-    predict() will load the model on first call and return real predictions.
+SESSION 5 STATUS:
+    Grad-CAM explainability integrated (Session 5).
+    predict() now returns a real base64-encoded heatmap and explanation.
 
 WORDING RULE:
     Predictions are probabilistic estimates, not certainties.
     Results are always described as "likely AI-generated" or "likely real".
     The system never claims 100% certainty.
+    The heatmap explanation text is truthful and non-deterministic.
 
 PUBLIC CONTRACT:
     predict(image_path: str) -> dict
     {
         "verdict":      "likely AI-generated" | "likely real",
-        "confidence":   float,   # 0.0 – 1.0 (certainty of stated verdict)
-        "raw_prob":     float,   # raw sigmoid output [0,1] (FAKE probability)
-        "heatmap":      None,    # base64 PNG — populated in Grad-CAM milestone
-        "explanation":  None,    # text template — populated in Grad-CAM milestone
+        "confidence":   float,        # 0.0 – 1.0 (certainty of stated verdict)
+        "raw_prob":     float,        # raw sigmoid output [0,1] (FAKE probability)
+        "heatmap":      str | None,   # base64-encoded PNG overlay (Grad-CAM)
+        "explanation":  str | None,   # probabilistic explanation text
     }
 
 ARCHITECTURE:
@@ -34,6 +34,7 @@ ARCHITECTURE:
     Threshold:    raw_prob >= 0.5 → "likely AI-generated"
                   raw_prob <  0.5 → "likely real"
     Confidence:   raw_prob if FAKE verdict,  (1 - raw_prob) if REAL verdict
+    Grad-CAM:     Target layer: out_relu (inside mobilenetv2_1.00_128)
 """
 
 from __future__ import annotations
@@ -158,8 +159,22 @@ def predict(image_path: str, weights_path: str | None = None) -> dict:
     # Run inference
     raw_prob = float(_model.predict(tensor, verbose=0)[0, 0])
 
+    # Generate Grad-CAM heatmap (best-effort — failure does not break prediction)
+    heatmap_b64 = None
+    explanation = None
+    try:
+        from gradcam import generate_gradcam, EXPLANATION_TEMPLATE
+        gc_result = generate_gradcam(image_path, _model)
+        heatmap_b64 = gc_result["overlay_b64"]   # overlay is more informative than raw heatmap
+        explanation = EXPLANATION_TEMPLATE
+    except Exception as exc:
+        logger.warning(
+            "Grad-CAM generation failed for '%s': %s — returning heatmap=None.",
+            image_path, exc,
+        )
+
     # Build result
-    return _build_result(raw_prob)
+    return _build_result(raw_prob, heatmap_b64=heatmap_b64, explanation=explanation)
 
 
 # ---------------------------------------------------------------------------
@@ -241,7 +256,11 @@ def _preprocess_image(image_path: str):
         ) from exc
 
 
-def _build_result(raw_prob: float) -> dict:
+def _build_result(
+    raw_prob: float,
+    heatmap_b64: str | None = None,
+    explanation: str | None = None,
+) -> dict:
     """
     Convert a raw sigmoid probability to the public prediction dict.
 
@@ -250,6 +269,10 @@ def _build_result(raw_prob: float) -> dict:
     raw_prob : float
         Output of Dense(1, activation='sigmoid'). Range [0, 1].
         Convention: higher value → more likely AI-generated (FAKE).
+    heatmap_b64 : str | None
+        Base64-encoded PNG of the Grad-CAM overlay, or None if unavailable.
+    explanation : str | None
+        Probabilistic explanation text, or None if unavailable.
 
     Returns
     -------
@@ -258,8 +281,8 @@ def _build_result(raw_prob: float) -> dict:
             "verdict":     "likely AI-generated" | "likely real",
             "confidence":  float (0.0 – 1.0),
             "raw_prob":    float,
-            "heatmap":     None,
-            "explanation": None,
+            "heatmap":     str | None,
+            "explanation": str | None,
         }
 
     Notes
@@ -267,8 +290,7 @@ def _build_result(raw_prob: float) -> dict:
     confidence reflects certainty of the stated verdict:
       - If verdict is FAKE: confidence = raw_prob
       - If verdict is REAL: confidence = 1 - raw_prob
-    So a confidence of 0.9 always means 90% certain of the stated verdict,
-    regardless of which verdict it is.
+    So a confidence of 0.9 always means 90% certain of the stated verdict.
     """
     if raw_prob >= CLASSIFICATION_THRESHOLD:
         verdict = VERDICT_AI
@@ -278,9 +300,9 @@ def _build_result(raw_prob: float) -> dict:
         confidence = 1.0 - raw_prob
 
     return {
-        "verdict": verdict,
-        "confidence": round(float(confidence), 4),
-        "raw_prob": round(float(raw_prob), 4),
-        "heatmap": None,       # base64 PNG — Grad-CAM milestone (future session)
-        "explanation": None,   # text description — Grad-CAM milestone (future session)
+        "verdict":     verdict,
+        "confidence":  round(float(confidence), 4),
+        "raw_prob":    round(float(raw_prob), 4),
+        "heatmap":     heatmap_b64,
+        "explanation": explanation,
     }

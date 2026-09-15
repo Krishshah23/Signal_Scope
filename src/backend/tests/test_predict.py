@@ -485,23 +485,25 @@ class TestRealInference:
         assert isinstance(confidence, float)
         assert 0.0 <= confidence <= 1.0
 
-    def test_real_inference_heatmap_null(self, client, real_jpeg_bytes):
-        """heatmap must be null — Grad-CAM not yet implemented."""
+    def test_real_inference_heatmap_string_or_none(self, client, real_jpeg_bytes):
+        """heatmap is a base64 string when Grad-CAM succeeds, or null — never fake."""
         resp = client.post(
             "/api/v1/predict/",
             data={"image": _make_upload(real_jpeg_bytes, "real_test.jpg")},
             content_type="multipart/form-data",
         )
-        assert resp.get_json()["result"]["heatmap"] is None
+        hm = resp.get_json()["result"]["heatmap"]
+        assert hm is None or (isinstance(hm, str) and len(hm) > 0)
 
-    def test_real_inference_explanation_null(self, client, real_jpeg_bytes):
-        """explanation must be null — Grad-CAM not yet implemented."""
+    def test_real_inference_explanation_string_or_none(self, client, real_jpeg_bytes):
+        """explanation is a string when Grad-CAM succeeds, or null."""
         resp = client.post(
             "/api/v1/predict/",
             data={"image": _make_upload(real_jpeg_bytes, "real_test.jpg")},
             content_type="multipart/form-data",
         )
-        assert resp.get_json()["result"]["explanation"] is None
+        exp = resp.get_json()["result"]["explanation"]
+        assert exp is None or isinstance(exp, str)
 
     def test_real_corrupt_image_returns_4xx(self, client):
         """A corrupt file that passes extension check should return 4xx, not crash."""

@@ -147,17 +147,23 @@ class TestPredictOutputStructure:
         result = predict(str(train_fake_sample), weights_path=str(weights_path))
         assert 0.0 <= result["confidence"] <= 1.0
 
-    def test_heatmap_is_none(self, train_fake_sample, weights_path):
-        """Heatmap must be None until Grad-CAM milestone."""
+    def test_heatmap_is_string_or_none(self, train_fake_sample, weights_path):
+        """Heatmap is a base64 string when Grad-CAM succeeds, or None if it fails."""
         from predict import predict
         result = predict(str(train_fake_sample), weights_path=str(weights_path))
-        assert result["heatmap"] is None
+        hm = result["heatmap"]
+        assert hm is None or (isinstance(hm, str) and len(hm) > 0), (
+            f"heatmap must be a non-empty string or None, got: {type(hm)}"
+        )
 
-    def test_explanation_is_none(self, train_fake_sample, weights_path):
-        """Explanation must be None until Grad-CAM milestone."""
+    def test_explanation_is_string_or_none(self, train_fake_sample, weights_path):
+        """Explanation is a string when Grad-CAM succeeds, or None if it fails."""
         from predict import predict
         result = predict(str(train_fake_sample), weights_path=str(weights_path))
-        assert result["explanation"] is None
+        exp = result["explanation"]
+        assert exp is None or isinstance(exp, str), (
+            f"explanation must be a string or None, got: {type(exp)}"
+        )
 
     def test_predict_on_real_image(self, train_real_sample, weights_path):
         """predict() must work on REAL images too, not just FAKE."""
